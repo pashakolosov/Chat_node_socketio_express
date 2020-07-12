@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            background: #fcfcfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+        <h5 class="my-0 mr-md-auto font-weight-normal">Company name</h5>
+        <nav class="my-2 my-md-0 mr-md-3">
+          <a class="p-2 text-dark" href="#">Features</a>
+          <a class="p-2 text-dark" href="#">Enterprise</a>
+          <a class="p-2 text-dark" href="#">Support</a>
+          <a class="p-2 text-dark" href="#">Pricing</a>
+        </nav>
+        <a class="btn btn-outline-primary" href="#">Sign up</a>
+      </div>
+
+    <div class="container">
+      <div class="py-5 text-conter">
+        <h2>Chat</h2>
+        <p class="lead">Укажите имя и начинайте переписку</p>
+      </div>
+      
+      <div class="row">
+        <div class="col-6">
+            <h3>Форма сообщений</h3>
+            <form id="messForm">
+                <label for="name">Имя</label>
+                <input type="text" name="name" id="name" placeholder="Введите имя" class="form-control">
+                <br>
+
+                <label for="message">Сообщение</label>
+                <textarea name="message" id="message" class="form-control" placeholder="Введите сообщение"></textarea>
+                <br>
+                <input type="submit" value="Отправить" class="btn btn-danger">
+            </form>
+        </div>
+
+        <div>
+
+            <div class="col-6">
+                <h3>Сообщение</h3>
+                <div id="all_mess"></div>
+            </div>
+
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let min = 1;
+        let max = 6;
+        let random = Math.floor(Math.random() * (max - min)) + min;
+
+        let alertClass;
+        switch (random) {
+            case 1:
+                alertClass = 'secondary';
+                break;
+            case 2:
+                alertClass = 'danger';
+                break;
+            case 3:
+                alertClass = 'success';
+                break;
+            case 4:
+                alertClass = 'warning';
+                break;
+            case 5:
+                alertClass = 'info';
+                break;
+            case 6:
+                alertClass = 'Light';
+                break;
+        }
+        $(() => {
+            const socket = io.connect();
+            let $form = $("#messForm");
+            let $name = $("#name");
+            let $textArea = $("#message");
+            let $all_message = $("#all_mess");
+
+            $form.submit((event) => {
+                event.preventDefault();
+                socket.emit('send mess', {mess: $textArea.val(), name: $name.val(), className: alertClass});
+                $textArea.val('');
+            });
+
+            socket.on('add mess', (data) => {
+                $all_message.append(`<div class="alert alert-${data.className}" role="alert" style="min-width:300px" >
+                                        <b>${data.name}</b>: 
+                                        <br>${data.mess}
+                                    </div>`);
+            });
+
+        });
+    </script> 
+</body>
+</html>
